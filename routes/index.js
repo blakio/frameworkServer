@@ -1,6 +1,6 @@
 const db = require("../models");
 const mongojs = require("mongojs");
-// const seedDB = require("../seedDB");
+const seedDB = require("./seedDB");
 // seedDB(db);
 
 module.exports = (app) => {
@@ -48,7 +48,7 @@ module.exports = (app) => {
              })
             .then(data => res.json(data))
             .catch(err => res.json(err))
-    })
+    });
 
     /*
 

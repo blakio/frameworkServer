@@ -4,10 +4,12 @@ const mongojs = require("mongojs");
 // db.sidebars.remove({})
 // db.sidebarchildren.remove({})
 // db.sidebargrandchildren.remove({})
+// db.dashboards.find({})
 
 // db.sidebars.find({})
 // db.sidebarchildren.find({})
 // db.sidebargrandchildren.find({})
+// db.dashboards.remove({})
 
 const employees = [
     {
@@ -23,6 +25,24 @@ const employees = [
         jobTitle: "Human Resources",
     }
 ];
+
+const dashboard = [
+    {
+        title: "time sheet",
+        conditions: ["5e7bd7cdf54f6b61dcdb1d61", "5e7bd7cdf54f6b61dcdb1d68"],
+        component: "timesheet"
+    },
+    {
+        title: "history",
+        conditions: ["5e7bd7cdf54f6b61dcdb1d63"],
+        component: "table"
+    },
+    {
+        title: "charts",
+        conditions: ["5e7bd7cdf54f6b61dcdb1d63"],
+        component: "charts"
+    }
+]
 
 const sideBar = [
     {
@@ -84,6 +104,8 @@ const createMultiple = (table, data) => {
 
 module.exports = (db) => {
     employees.forEach(data => db.Employee.create(data));
+
+    dashboard.forEach(data => db.Dashboard.create(data));
     
     // sidebar population //////////////////////////
     const allDropdowns = [];

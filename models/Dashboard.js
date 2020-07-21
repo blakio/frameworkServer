@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 const DashboardSchema = new Schema({
     title: String,
     conditions: Array,
-    component: String
+    component: String,
+    columns: String
 });
 
 const Dashboard = mongoose.model("Dashboard", DashboardSchema);

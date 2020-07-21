@@ -3,13 +3,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const TimeSchema = new Schema({
-    EmployeeId: Schema.Types.ObjectId,
-    clockIn: Date,
-    toLunch: Date,
-    fromLunch: Date,
-    clockOut: Date,
-    vacationHrs: Number,
-    paidTimeOffHrs: Number
+    employeeId: Schema.Types.ObjectId,
+    isClockedIn: Schema.Types.Boolean,
+    time: [{
+        zoneName: String,
+        timestamp: Number,
+        formatted: Date,
+        hasClockedIn: Boolean
+    }]
 });
 
 const Time = mongoose.model("Time", TimeSchema);

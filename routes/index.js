@@ -56,7 +56,6 @@ module.exports = (app) => {
     app.post("/api/table/aggregate/:table/:id", (req, res) => {
         // const id = req.body.query[0].$match.employeeId;
         // req.body.query[0].$match.employeeId = mongoose.Types.ObjectId(id);
-        console.log(req.body.query)
         db[req.params.table].aggregate([
             {
                 $match: {

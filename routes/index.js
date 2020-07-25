@@ -7,11 +7,81 @@ const axios = require("axios");
 axios.defaults.headers.post['Content-Type'] ='application/json;charset=utf-8';
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
+const moment = require("moment");
+var mtz = require('moment-timezone');
+
 const getUpdate = req => {
     const update = {};
     if(req.body.field)      update.$push = { [req.body.field]: req.body.data };
     if(req.body.setFields)  update.$set = { ...req.body.setFields };
     return update;
+}
+
+const getTimeDifferences = (pairs) => {
+    const times = [];
+    pairs.forEach(data => {
+        const start = moment(data[0].time.formatted);
+        const end = moment(data[1].time.formatted);
+        times.push(moment.duration(end.diff(start)));
+    });
+    const hoursDiff = [];
+    times.forEach(data => {
+        hoursDiff.push(data.asHours())
+    })
+    const arrSum = arr => arr.reduce((a, b) => a + b, 0)
+    return arrSum(hoursDiff).toFixed(2);
+}
+
+const getTimeWorks = (td, Time, employeeId, res) => {
+
+    const arr = [...td];
+    if (!td[0].time.hasClockedIn) {
+        arr.shift();
+    }
+    let chunks = [];
+    const division = arr.length / 2;
+    const size = arr.length / division;
+
+    if(arr.length === 2){
+        chunks = [ [...arr] ]
+    } else {
+        for (let i = 0; i < arr.length; i += size) {
+            chunks.push(arr.slice(i, i + size))
+        }
+    }
+
+    if(chunks[chunks.length - 1].length === 1){
+        const curId = chunks[chunks.length - 1][0].time._id;
+        const query = [
+            { $match: { employeeId } },
+            { $unwind: "$time" },
+            {
+                "$match": {
+                    "time._id": {
+                        "$gt": curId
+                    }
+                }
+            }
+        ];
+        Time.aggregate(query).then(data => {
+            if(data.length === 0){
+                chunks.pop();
+                console.log(chunks)
+                return res.json({
+                    hours: getTimeDifferences(chunks)
+                })
+            } else {
+                chunks.push(data[0]);
+                return res.json({
+                    hours: getTimeDifferences(chunks)
+                })
+            }
+        }).catch(err => res.json({err}))
+    } else {
+        return res.json({
+            hours: getTimeDifferences(chunks)
+        })
+    }
 }
 
 module.exports = (app) => {
@@ -21,6 +91,46 @@ module.exports = (app) => {
             res.json(data.data);
         }).catch(err => res.json(err))
     });
+
+    // GET api/timesheet/hours/:date
+    app.post("/api/timesheet/hours/day/:id", (req, res) => {
+        const { day } = req.body;
+        // const day = "07/25/20";
+        const tzDifference = mtz(day).tz("America/New_York").format();
+        const diffString = tzDifference.slice(tzDifference.length - 6);
+        const split = diffString.split(":");
+        const sign = split[0].includes("-") ? "subtract" : "add";
+        const hours = split[0].replace("-", "");
+        const minutes = split[1];
+
+        const start = moment(day).startOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix()
+        const end = moment(day).endOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix();
+        const employeeId = mongoose.Types.ObjectId(req.params.id);
+        db.Time.aggregate([
+            {
+                $match: { employeeId }
+            },
+            {
+                $unwind: "$time"
+            },
+            {
+                "$match": {
+                    "time.timestamp": {
+                        "$gte": start,
+                        "$lte": end
+                    }
+                }
+            }
+        ]).then(data => {
+            if(data.length){
+                getTimeWorks(data, db.Time, employeeId, res)
+            } else {
+                res.json({
+                    hours: "0"
+                })
+            }
+        }).catch(err => res.json({err}))
+    })
 
     // GET api/table/:table
     app.get("/api/table/:table", (req, res) => {
@@ -54,8 +164,6 @@ module.exports = (app) => {
 
     // POST /api/table/search/Time
     app.post("/api/table/aggregate/:table/:id", (req, res) => {
-        // const id = req.body.query[0].$match.employeeId;
-        // req.body.query[0].$match.employeeId = mongoose.Types.ObjectId(id);
         db[req.params.table].aggregate([
             {
                 $match: {
@@ -107,21 +215,4 @@ module.exports = (app) => {
     //         .then(data => res.json(data))
     //         .catch(err => res.json(err))
     // });
-
-    /*
-
-    EXAMPLES
-
-    app.post("/submit", ({body}, res) => {
-    db.Book.create(body)
-        .then(({_id}) => db.Library.findOneAndUpdate({}, { $push: { books: _id } }, { new: true }))
-        .then(dbLibrary => {
-        res.json(dbLibrary);
-        })
-        .catch(err => {
-        res.json(err);
-        });
-    });
-
-    */
 }

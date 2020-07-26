@@ -38,6 +38,9 @@ const getTimeWorks = (td, Time, employeeId, res) => {
     if (!td[0].time.hasClockedIn) {
         arr.shift();
     }
+    if(!arr.length) return res.json({
+        hours: "0"
+    });
     let chunks = [];
     const division = arr.length / 2;
     const size = arr.length / division;
@@ -66,12 +69,11 @@ const getTimeWorks = (td, Time, employeeId, res) => {
         Time.aggregate(query).then(data => {
             if(data.length === 0){
                 chunks.pop();
-                console.log(chunks)
                 return res.json({
                     hours: getTimeDifferences(chunks)
                 })
             } else {
-                chunks.push(data[0]);
+                chunks[chunks.length - 1].push(data[0])
                 return res.json({
                     hours: getTimeDifferences(chunks)
                 })

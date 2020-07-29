@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-
-const Schema = mongoose.Schema;
+const {
+    Schema
+} = require("mongoose");
 
 const TimeSchema = new Schema({
     employeeId: Schema.Types.ObjectId,
@@ -13,6 +13,4 @@ const TimeSchema = new Schema({
     }]
 });
 
-const Time = mongoose.model("Time", TimeSchema);
-
-module.exports = Time;
+module.exports = TimeSchema;

@@ -1,4 +1,4 @@
-const db = require("../models");
+const db = require("../models").models;
 const mongojs = require("mongojs");
 const mongoose = require("mongoose")
 const clockwork = require('clockwork')({key: process.env.CLOCK_WORK_API_KEY});
@@ -203,18 +203,4 @@ module.exports = (app) => {
             (error, data) => res.send(error ? error : data)
         );
     });
-
-    // side bar routes
-    // app.get("/api/sidebar", (req, res) => {
-    //     db.SideBar.find({})
-    //         .populate({ 
-    //             path: 'data',
-    //             populate: {
-    //               path: 'data',
-    //               model: 'SideBarGrandChild'
-    //             } 
-    //          })
-    //         .then(data => res.json(data))
-    //         .catch(err => res.json(err))
-    // });
 }

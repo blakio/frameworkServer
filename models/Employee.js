@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-
-const Schema = mongoose.Schema;
+const {
+    Schema
+} = require("mongoose");
 
 const EmployeeSchema = new Schema({
     firstName: String,
@@ -33,6 +33,4 @@ const EmployeeSchema = new Schema({
     updatedById: Schema.Types.ObjectId
 });
 
-const Employee = mongoose.model("Employee", EmployeeSchema);
-
-module.exports = Employee;
+module.exports = EmployeeSchema;

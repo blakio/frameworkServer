@@ -1,11 +1,9 @@
-// Exporting an object containing all of our models
+const mongoose = require('mongoose');
+const conn = mongoose.createConnection(`mongodb+srv://admin:${process.env.MONGODB_PASSWORD}@blakio.lojxu.mongodb.net/dashboard?retryWrites=true&w=majority`);
 
-module.exports = {
-  // Dashboard: require("./Dashboard"),
-  Employee: require("./Employee"),
-  Time: require("./Time"),
-  SidebarOptions: require("./SidebarOptions"),
-  Note: require("./Note"),
-  // SideBarChild: require("./SideBarChild"),
-  // SideBarGrandChild: require("./SideBarGrandChild")
-};
+conn.model('Employee',        require('./Employee'));
+conn.model('Time',            require('./Time'));
+conn.model('SidebarOptions',  require('./SidebarOptions'));
+conn.model('Note',            require('./Note'));
+
+module.exports = conn;

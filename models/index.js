@@ -5,6 +5,7 @@ module.exports = {
   Employee: require("./Employee"),
   Time: require("./Time"),
   SidebarOptions: require("./SidebarOptions"),
+  Note: require("./Note"),
   // SideBarChild: require("./SideBarChild"),
   // SideBarGrandChild: require("./SideBarGrandChild")
 };

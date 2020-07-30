@@ -1,4 +1,4 @@
-const db = require("../models").models;
+const db = require("../models");
 const mongojs = require("mongojs");
 const mongoose = require("mongoose")
 const clockwork = require('clockwork')({key: process.env.CLOCK_WORK_API_KEY});
@@ -9,6 +9,11 @@ axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 const moment = require("moment");
 var mtz = require('moment-timezone');
+
+const routeMapper = require("./routeMapper");
+const getDB = (blakio_store) => {
+    return db[routeMapper[blakio_store]].models;
+}
 
 const getUpdate = req => {
     const update = {};
@@ -108,7 +113,7 @@ module.exports = (app) => {
         const start = moment(day).startOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix()
         const end = moment(day).endOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix();
         const employeeId = mongoose.Types.ObjectId(req.params.id);
-        db.Time.aggregate([
+        getDB(req.headers.blakio_store).Time.aggregate([
             {
                 $match: { employeeId }
             },
@@ -125,7 +130,7 @@ module.exports = (app) => {
             }
         ]).then(data => {
             if(data.length){
-                getTimeWorks(data, db.Time, employeeId, res)
+                getTimeWorks(data, getDB(req.headers.blakio_store).Time, employeeId, res)
             } else {
                 res.json({
                     hours: "0"
@@ -136,7 +141,7 @@ module.exports = (app) => {
 
     // GET api/table/:table
     app.get("/api/table/:table", (req, res) => {
-        db[req.params.table].find({})
+        getDB(req.headers.blakio_store)[req.params.table].find({})
             .then(table => res.json(table))
             .catch(err => res.json(err));
     });
@@ -147,11 +152,11 @@ module.exports = (app) => {
             const update = getUpdate(req);
             const options = { upsert: true };
 
-            db[req.params.table].findOneAndUpdate(req.body.query, update, options, function (err, table) {
+            getDB(req.headers.blakio_store)[req.params.table].findOneAndUpdate(req.body.query, update, options, function (err, table) {
                 res.json(err ? err : table)
             });
         } else {
-            db[req.params.table].create(req.body)
+            getDB(req.headers.blakio_store)[req.params.table].create(req.body)
                 .then(table => res.json(table))
                 .catch(err => res.json(err));
         }
@@ -159,14 +164,14 @@ module.exports = (app) => {
 
     // POST /api/table/search/Time
     app.post("/api/table/search/:table", (req, res) => {
-        db[req.params.table].find(req.body.query)
+        getDB(req.headers.blakio_store)[req.params.table].find(req.body.query)
             .then(table => res.json(table))
             .catch(err => res.json(err));
     });
 
     // POST /api/table/search/Time
     app.post("/api/table/aggregate/:table/:id", (req, res) => {
-        db[req.params.table].aggregate([
+        getDB(req.headers.blakio_store)[req.params.table].aggregate([
             {
                 $match: {
                     employeeId: mongoose.Types.ObjectId(req.params.id)
@@ -189,7 +194,7 @@ module.exports = (app) => {
 
     // PUT /api/table/:table/:id
     app.put("/api/table/:table/:id", (req, res) => {
-        db[req.params.table].update(
+        getDB(req.headers.blakio_store)[req.params.table].update(
             { _id: mongojs.ObjectId(req.params.id) },
             { $set: req.body },
             (error, data) => res.send(error ? error : data)
@@ -198,7 +203,7 @@ module.exports = (app) => {
 
     // DELETE /api/table/:table/:id
     app.delete("/api/table/:table/:id", (req, res) => {
-        db[req.params.table].remove(
+        getDB(req.headers.blakio_store)[req.params.table].remove(
             { _id: mongojs.ObjectID(req.params.id) },
             (error, data) => res.send(error ? error : data)
         );

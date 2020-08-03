@@ -10,6 +10,11 @@ axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 const moment = require("moment");
 var mtz = require('moment-timezone');
 
+const pinMapper = {
+    blko: "blakio",
+    wppd: "westPhillyProduce"
+}
+
 const routeMapper = require("./routeMapper");
 const getDB = (blakio_store) => {
     return db[routeMapper[blakio_store]].models;
@@ -92,6 +97,12 @@ const getTimeWorks = (td, Time, employeeId, res) => {
 }
 
 module.exports = (app) => {
+    /**
+     * GET
+     */
+
+
+
     // GET api/time
     app.get("/api/time", (req, res) => {
         axios.get(`http://api.timezonedb.com/v2.1/get-time-zone?key=7PUNDMDEMWEX&format=json&by=position&lat=40.689247&lng=-74.0445022`).then(data => {
@@ -146,6 +157,14 @@ module.exports = (app) => {
             .catch(err => res.json(err));
     });
 
+
+
+    /**
+     * POST
+     */
+
+
+
     // POST /api/table/:table
     app.post("/api/table/:table", (req, res) => {
         if(req.body.field || req.body.setFields){
@@ -192,6 +211,48 @@ module.exports = (app) => {
             });
     });
 
+    // POST api/getTimeChangeConstraints
+    app.post("/api/getTimeChangeConstraints", (req, res) => {
+        const query = res.body.query
+        getDB(req.headers.blakio_store)[req.params.table].aggregate([
+            {
+                $match: {
+                    employeeId: mongoose.Types.ObjectId(req.params.id)
+                }
+            },
+            ...req.body.query
+        ])
+            .then(table => res.send(table))
+            .catch(err => res.json(err));
+    });
+
+    app.post("/api/login", (req, res) => {
+        const {
+            pin,
+            check
+        } = req.body;
+        const store = pinMapper[pin];
+        if(check){
+            res.json({
+                logIn: Object.values(pinMapper).includes(check)
+            })
+        } else if(pin && store){
+            res.json({ store })
+        } else {
+            res.status(404).json({
+                title: "Incorrect Pin",
+                message: "Please try again. Thanks"
+            })
+        }
+    })
+
+
+    /**
+     * PUT
+     */
+
+
+
     // PUT /api/table/:table/:id
     app.put("/api/table/:table/:id", (req, res) => {
         getDB(req.headers.blakio_store)[req.params.table].update(
@@ -200,6 +261,14 @@ module.exports = (app) => {
             (error, data) => res.send(error ? error : data)
         );
     });
+
+
+
+    /**
+     * DELETE
+     */
+
+
 
     // DELETE /api/table/:table/:id
     app.delete("/api/table/:table/:id", (req, res) => {

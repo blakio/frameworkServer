@@ -280,24 +280,18 @@ module.exports = (app) => {
     });
 
     // PUT /api/table/array/:table/:id
-    app.post("/api/array/:table/:id", (req, res) => {
-        getDB(req.headers.blakio_store)[req.params.table].update(
-            { "time._id":  mongoose.Types.ObjectId("5f2c94220561dae80111df13")},
+    app.post("/api/updateTime", (req, res) => {
+        getDB(req.headers.blakio_store).Time.update(
+            { "time._id":  mongoose.Types.ObjectId(req.body.id)},
             {
                 "$set": {
-                    "time.$.formatted": "2020-08-06T23:37:29.000Z",
-                    "time.$.timestamp": 1596742649
+                    "time.$.formatted": req.body.formatted,
+                    "time.$.timestamp": req.body.timestamp
                 }
             }
         ).then(data => {
             res.json(data)
-        }).catch(err => res.send(err))
-        
-        // .update(
-        //     { _id: mongojs.ObjectId(req.params.id) },
-        //     { $set: req.body },
-        //     (error, data) => res.send(error ? error : data)
-        // );
+        }).catch(err => res.send(err));
     });
 
 

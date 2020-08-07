@@ -244,7 +244,61 @@ module.exports = (app) => {
                 message: "Please try again. Thanks"
             })
         }
-    })
+    });
+
+    app.post("/api/getTimeBoundaries/:id/:timestamp", (req, res) => {
+
+        const boundaries = {};
+
+        const {
+            id,
+            timestamp
+        } = req.params;
+
+        const next = [
+            { $match: { employeeId: mongoose.Types.ObjectId(id) } },
+            { $unwind: "$time" },
+            { "$match": { "time.timestamp": { "$gt": parseInt(timestamp) } } }
+        ];
+
+        const prev = [
+            { $match: { employeeId: mongoose.Types.ObjectId(id) } },
+            { $unwind: "$time" },
+            { "$match": { "time.timestamp": { "$lt": parseInt(timestamp) } } }
+        ];
+
+        getDB(req.headers.blakio_store).Time.aggregate(next).limit(1)
+            .then(data => {
+                boundaries.next = data[0];
+                getDB(req.headers.blakio_store).Time.aggregate(prev).sort({ "time.timestamp": "desc" }).limit(1)
+                    .then(data2 => {
+                        boundaries.prev = data2[0];
+                        res.json(boundaries);
+                    }).catch(err => res.json(err))
+            })
+            .catch(err => res.json(err));
+    });
+
+    // PUT /api/table/array/:table/:id
+    app.post("/api/array/:table/:id", (req, res) => {
+        getDB(req.headers.blakio_store)[req.params.table].update(
+            { "time._id":  mongoose.Types.ObjectId("5f2c94220561dae80111df13")},
+            {
+                "$set": {
+                    "time.$.formatted": "2020-08-06T23:37:29.000Z",
+                    "time.$.timestamp": 1596742649
+                }
+            }
+        ).then(data => {
+            res.json(data)
+        }).catch(err => res.send(err))
+        
+        // .update(
+        //     { _id: mongojs.ObjectId(req.params.id) },
+        //     { $set: req.body },
+        //     (error, data) => res.send(error ? error : data)
+        // );
+    });
 
 
     /**

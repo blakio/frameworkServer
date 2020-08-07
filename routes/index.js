@@ -10,12 +10,11 @@ axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 const moment = require("moment");
 var mtz = require('moment-timezone');
 
-const pinMapper = {
-    blko: "blakio",
-    wppd: "westPhillyProduce"
-}
+const {
+    pinMapper,
+    routeMapper
+} = require("../config");
 
-const routeMapper = require("./routeMapper");
 const getDB = (blakio_store) => {
     return db[routeMapper[blakio_store]].models;
 }

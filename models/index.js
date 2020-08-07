@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
+const {
+  collections
+} = require("../config");
+
 const connections = {};
-const collections = ['dashboard', 'westPhillyProduce'];
 
 collections.map(data => {
   connections[data] = mongoose.createConnection(`mongodb+srv://admin:${process.env.MONGODB_PASSWORD}@blakio.lojxu.mongodb.net/${data}?retryWrites=true&w=majority`, { useFindAndModify: false });

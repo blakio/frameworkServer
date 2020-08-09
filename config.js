@@ -1,11 +1,13 @@
 module.exports = {
-    collections: ['dashboard', 'westPhillyProduce'],
+    collections: ['dashboard', 'westPhillyProduce', 'wellnessAndCompany'],
     routeMapper: {
         blakio: "dashboard",
-        westPhillyProduce: "westPhillyProduce"
+        westPhillyProduce: "westPhillyProduce",
+        wellnessAndCompany: "wellnessAndCompany"
     },
     pinMapper: {
         blko: "blakio",
-        wppd: "westPhillyProduce"
+        wppd: "westPhillyProduce",
+        wnac: "wellnessAndCompany"
     }
 }

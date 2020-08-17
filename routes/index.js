@@ -102,6 +102,12 @@ module.exports = (app) => {
 
 
 
+    // GET api/square/callback
+    app.get("/api/square/callback", (req, res) => {
+        console.log(req)
+        res.send("ok")
+    })
+    
     // GET api/accessToken
     app.get("/api/accessToken", (req, res) => {
         const username = "AVj7DISqu3xid2JT0pv82WPa7iEHx8k39JVZ3OoMT2QA-pGIwcJOQeiDIIZwT2XQVVbpdUuDjcNP4ko4";

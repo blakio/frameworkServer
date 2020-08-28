@@ -12,6 +12,7 @@ collections.map(data => {
   connections[data].model('Time',            require('./Time'));
   connections[data].model('SidebarOptions',  require('./SidebarOptions'));
   connections[data].model('Note',            require('./Note'));
-})
+  connections[data].model('Product',         require('./Product'));
+});
 
 module.exports = connections;

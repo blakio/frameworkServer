@@ -102,6 +102,11 @@ module.exports = (app) => {
 
 
 
+    // GET api/confirmation
+    app.get("/api/confirmation", (req, res) => {
+        res.sendFile('./confirmation/index.html', {root: __dirname })
+    })
+
     // GET api/square/callback
     app.get("/api/square/callback", (req, res) => {
         console.log(req)

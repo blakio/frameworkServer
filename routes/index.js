@@ -102,6 +102,39 @@ module.exports = (app) => {
 
 
 
+    // GET api/square/callback
+    app.get("/api/square/callback", (req, res) => {
+        console.log(req)
+        res.send("ok")
+    })
+    
+    // GET api/accessToken
+    app.get("/api/accessToken", (req, res) => {
+        const username = "AVj7DISqu3xid2JT0pv82WPa7iEHx8k39JVZ3OoMT2QA-pGIwcJOQeiDIIZwT2XQVVbpdUuDjcNP4ko4";
+        const password = "ENxNp7xsqEZkIpDthMnp0cB7fzDH0RwfCsm_xGYjWFFoWpk1GLAm_G1XRZpZIRUlM7UZdwX__s_-7jn-";
+        // const username = "sb-dgdjr2944412_api1.business.example.com";
+        // const password = "MdOx3Ne$";
+        
+        axios({
+            url: 'https://api.sandbox.paypal.com/v1/oauth2/token',
+            method: 'post',
+            headers: { 
+                'Accept': 'application/json', 
+                'Accept-Language': 'en_US',
+                'content-type':'application/x-www-form-urlencoded'
+            },
+            auth: {
+                username,
+                password
+            },
+            params: {
+                grant_type:'client_credentials'
+            }
+        }).then(data => {
+            res.send(data.data.access_token)
+        }).catch(err => res.send(err))
+    });
+
     // GET api/time
     app.get("/api/time", (req, res) => {
         axios.get(`http://api.timezonedb.com/v2.1/get-time-zone?key=7PUNDMDEMWEX&format=json&by=position&lat=40.689247&lng=-74.0445022`).then(data => {

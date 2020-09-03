@@ -11,6 +11,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 require("./routes")(app);
 
 app.listen(PORT, () => console.log(`App running on port ${PORT}!`));

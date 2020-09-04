@@ -13,7 +13,7 @@ var mtz = require('moment-timezone');
 
 const md5 = require('md5');
 const SquareConnect = require('square-connect');
-const config = require('./config.js')
+const config = require('./config.js');
 // Configure Square defcault client
 const defaultClient = SquareConnect.ApiClient.instance
 defaultClient.basePath = config.SQ_SANDBOX_BASEURL
@@ -409,17 +409,17 @@ module.exports = (app) => {
         console.log(req.query)
         // Verify the state to protect against cross-site request forgery.
         if (req.cookies["Auth_State"] !== req.query['state']) {
-            res.send({error: "Invalid state parameter."})
+            res.json({error: "Invalid state parameter."})
         }
 
         else if (req.query['error']) {
             // Check to see if the seller clicked the Deny button and handle it as a special case.
             if (("access_denied" === req.query['error']) && ("user_denied" === req.query["error_description"])) {
-                res.send({error: "You chose to deny access to the app."})
+                res.json({error: "You chose to deny access to the app."})
             }
             // Display the error and description for all other errors.
             else {
-                res.send({error: eq.query["error_description"]})
+                res.json({error: eq.query["error_description"]})
             }
         }
         // When the response_type is "code", the seller clicked Allow
@@ -441,7 +441,7 @@ module.exports = (app) => {
                     // Because we want to keep things simple and we're using Sandbox,
                     // we call a function that writes the tokens to the page so we can easily copy and use them directly.
                     // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
-                    res.send({
+                    res.json({
                         access_token: data.access_token,
                         refresh_token: data.refresh_token,
                         expires_at: data.expires_at,
@@ -450,12 +450,12 @@ module.exports = (app) => {
                 })
                 // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
                 .catch(error => {
-                    res.send({error: error.response.body.message})
+                    res.json({error: error.response.body.message})
                 })
         }
         else {
             // No recognizable parameters were returned.
-            res.send({error: "Expected parameters were not returned"})
+            res.json({error: "Expected parameters were not returned"})
         }
     });
 }

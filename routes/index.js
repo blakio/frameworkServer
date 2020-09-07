@@ -11,25 +11,14 @@ axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 const moment = require("moment");
 var mtz = require('moment-timezone');
 
-const APP_ID = "sq0idp-4CVw5fpKwLHOxXyqa1LoZQ";
-const APP_SECRET = "sq0csp-GnIfma-RIjolC-TFjfzyMbcRBLCvEXZdphd1UMhCZmk";
 const BASEURL = "https://connect.squareup.com";
 const md5 = require('md5');
 const SquareConnect = require('square-connect');
-const config = require('./config.js');
 // Configure Square defcault client
 const defaultClient = SquareConnect.ApiClient.instance
 defaultClient.basePath = BASEURL
 // Configure Square OAuth API instance
 const oauthInstance = new SquareConnect.OAuthApi();
-// {
-//     "access_token": "EAAAEBpoLLsfhDTdVYiNlQuo_Xk4Hc0FsgeKhhq7FQa2CkLIHxBlQNKn7v2aBbep",
-//     "refresh_token": "EQAAEOnQvkaC1vvVlT40pIKc38N_4daoUxvye3d7xfUqYs2dcyGlUKaRT5FzIkxQ",
-//     "expires_at": "2020-10-06T19:51:43Z",
-//     "merchant_id": "MLFCVCSGSVM2K"
-// }
-// INCLUDE PERMISSIONS YOU WANT YOUR SELLER TO GRANT YOUR APPLICATION
-const access_token = "EAAAEBpoLLsfhDTdVYiNlQuo_Xk4Hc0FsgeKhhq7FQa2CkLIHxBlQNKn7v2aBbep";
 const scopes = [
     "ITEMS_READ",
     "MERCHANT_PROFILE_READ",
@@ -139,69 +128,6 @@ module.exports = (app) => {
      */
 
 
-
-    // GET api/confirmation
-    app.get("/api/confirmation", (req, res) => {
-        const {url} = req;
-        const a = url.replace("/api/confirmation?data=%7B%22", "");
-        const b = a.split("%22,%22");
-        const c = b.map(data => data.replace("%22:%22", "="));
-
-        let transactionId;
-        let database;
-
-        c.forEach(data => {
-            if(data.includes("state")){
-                const split = data.split("=");
-                database = split[1];
-            } else if(data.includes("transaction_id") && !data.includes("client_transaction_id")){
-                const split = data.split("=");
-                transactionId = split[1];
-            }
-        });
-
-        getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
-            data[0].paymentId = transactionId;
-            data[0].save(err => {
-                if(err) res.json({err: "error saving"})
-                res.sendFile('./confirmation/index.html', { root: __dirname })
-            })
-        }).catch(err => res.json({err}))
-
-    })
-
-    // GET api/square/callback
-    app.get("/api/square/callback", (req, res) => {
-        console.log(req)
-        res.send("ok")
-    })
-
-    // GET api/accessToken
-    app.get("/api/accessToken", (req, res) => {
-        const username = "AVj7DISqu3xid2JT0pv82WPa7iEHx8k39JVZ3OoMT2QA-pGIwcJOQeiDIIZwT2XQVVbpdUuDjcNP4ko4";
-        const password = "ENxNp7xsqEZkIpDthMnp0cB7fzDH0RwfCsm_xGYjWFFoWpk1GLAm_G1XRZpZIRUlM7UZdwX__s_-7jn-";
-        // const username = "sb-dgdjr2944412_api1.business.example.com";
-        // const password = "MdOx3Ne$";
-
-        axios({
-            url: 'https://api.sandbox.paypal.com/v1/oauth2/token',
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Accept-Language': 'en_US',
-                'content-type': 'application/x-www-form-urlencoded'
-            },
-            auth: {
-                username,
-                password
-            },
-            params: {
-                grant_type: 'client_credentials'
-            }
-        }).then(data => {
-            res.send(data.data.access_token)
-        }).catch(err => res.send(err))
-    });
 
     // GET api/time
     app.get("/api/time", (req, res) => {
@@ -433,19 +359,35 @@ module.exports = (app) => {
      * Description:
      *  Serves the link that merchants click to authorize your application
     */
-    app.get("/api/sandbox_request_token", (req, res) => {
-        // Set the Auth_State cookie with a random md5 string to protect against cross-site request forgery.
-        // Auth_State will expire in 300 seconds (5 mins) after the page is loaded.
-        const state = md5(Date.now());
-        // const SQ_SANDBOX_BASEURL = "https://connect.squareupsandbox.com";
-        // const url = config.SQ_SANDBOX_BASEURL + `/oauth2/authorize?client_id=${config.blakio.SQ_SANDBOX_APP_ID}&` + `response_type=code&` + `scope=${scopes.join('+')}` + `&state=` + state + `&session=` + false;
-        const url = BASEURL + `/oauth2/authorize?client_id=${APP_ID}&` + `response_type=code&` + `scope=${scopes.join('+')}` + `&state=` + state + `&session=` + false;
-        res.cookie("Auth_State", state, { expire: Date.now() + 300000 }).send(
-            `<p>
-            <a href='${url}'> SANDBOX: Authorize this application</a>
-        </p>`
-        )
+    app.get("/api/sandbox_request_token/:blakio_store", (req, res) => {
+        getDB(req.params.blakio_store)["Token"].find({}).then(data => {
+            const {
+                applicationId
+            } = data[0];
+
+            // Set the Auth_State cookie with a random md5 string to protect against cross-site request forgery.
+            // Auth_State will expire in 300 seconds (5 mins) after the page is loaded.
+            const state = md5(Date.now());
+            // const SQ_SANDBOX_BASEURL = "https://connect.squareupsandbox.com";
+            // const url = config.SQ_SANDBOX_BASEURL + `/oauth2/authorize?client_id=${config.blakio.SQ_SANDBOX_APP_ID}&` + `response_type=code&` + `scope=${scopes.join('+')}` + `&state=` + state + `&session=` + false;
+            const url = BASEURL + `/oauth2/authorize?client_id=${applicationId}&` + `response_type=code&` + `scope=${scopes.join('+')}` + `&state=` + state + `&session=` + false;
+            res.cookie("Auth_State", state, { expire: Date.now() + 300000 }).send(
+                `<p>
+                <a href='${url}'> SANDBOX: Authorize this application</a>
+            </p>`
+            )
+        }).catch(err => res.json({ err }))
     });
+
+    // getDB(req.headers.blakio_store)["Token"].find({}).then(data => {
+    //     const {
+    //         applicationId,
+    //         accessTokenSecret,
+    //         accessTokenOath,
+    //         refreshToken
+    //     } = data[0];
+        
+    // });
 
     /**
      * Description:
@@ -459,122 +401,204 @@ module.exports = (app) => {
      *  code: the authorization code
      */
     app.get('/api/sandbox_callback', (req, res) => {
-        console.log(req.query)
-        // Verify the state to protect against cross-site request forgery.
-        if (req.cookies["Auth_State"] !== req.query['state']) {
-            res.json({ error: "Invalid state parameter." })
-        }
-
-        else if (req.query['error']) {
-            // Check to see if the seller clicked the Deny button and handle it as a special case.
-            if (("access_denied" === req.query['error']) && ("user_denied" === req.query["error_description"])) {
-                res.json({ error: "You chose to deny access to the app." })
+        getDB("blakio")["Token"].find({}).then(data => {
+            const {
+                applicationId,
+                accessTokenSecret
+            } = data[0];
+            
+            console.log(req.query)
+            // Verify the state to protect against cross-site request forgery.
+            if (req.cookies["Auth_State"] !== req.query['state']) {
+                res.json({ error: "Invalid state parameter." })
             }
-            // Display the error and description for all other errors.
-            else {
-                res.json({ error: eq.query["error_description"] })
+    
+            else if (req.query['error']) {
+                // Check to see if the seller clicked the Deny button and handle it as a special case.
+                if (("access_denied" === req.query['error']) && ("user_denied" === req.query["error_description"])) {
+                    res.json({ error: "You chose to deny access to the app." })
+                }
+                // Display the error and description for all other errors.
+                else {
+                    res.json({ error: eq.query["error_description"] })
+                }
             }
-        }
-        // When the response_type is "code", the seller clicked Allow
-        // and the authorization page returned the auth tokens.
-        else if ("code" === req.query["response_type"]) {
-            // Extract the returned authorization code from the URL
-            var code = req.query.code
-
-            // Provide the code in a request to the Obtain Token endpoint
-            var body = {
-                client_id: APP_ID,
-                client_secret: APP_SECRET,
-                code: code,
-                grant_type: 'authorization_code',
-            }
-            oauthInstance.obtainToken(body)
-                // Extract the returned access token from the ObtainTokenResponse object
-                .then(data => {
-                    // Because we want to keep things simple and we're using Sandbox,
-                    // we call a function that writes the tokens to the page so we can easily copy and use them directly.
-                    // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
-                    res.json({
-                        access_token: data.access_token,
-                        refresh_token: data.refresh_token,
-                        expires_at: data.expires_at,
-                        merchant_id: data.merchant_id
+            // When the response_type is "code", the seller clicked Allow
+            // and the authorization page returned the auth tokens.
+            else if ("code" === req.query["response_type"]) {
+                // Extract the returned authorization code from the URL
+                var code = req.query.code
+    
+                // Provide the code in a request to the Obtain Token endpoint
+                var body = {
+                    client_id: applicationId,
+                    client_secret: accessTokenSecret,
+                    code: code,
+                    grant_type: 'authorization_code',
+                }
+                oauthInstance.obtainToken(body)
+                    // Extract the returned access token from the ObtainTokenResponse object
+                    .then(data => {
+                        // Because we want to keep things simple and we're using Sandbox,
+                        // we call a function that writes the tokens to the page so we can easily copy and use them directly.
+                        // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
+                        res.json({
+                            access_token: data.access_token,
+                            refresh_token: data.refresh_token,
+                            expires_at: data.expires_at,
+                            merchant_id: data.merchant_id
+                        })
                     })
-                })
-                // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
-                .catch(error => {
-                    res.json({ error: error.response.body.message })
-                })
-        }
-        else {
-            // No recognizable parameters were returned.
-            res.json({ error: "Expected parameters were not returned" })
-        }
+                    // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
+                    .catch(error => {
+                        res.json({ error: error.response.body.message })
+                    })
+            }
+            else {
+                // No recognizable parameters were returned.
+                res.json({ error: "Expected parameters were not returned" })
+            }
+        });
     });
 
     app.get("/api/listPayments", (req, res) => {
-        const token = access_token;
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Square-Version": "2020-08-26",
-                "Content-Type": "application/json"
-            }
-        };
-        axios.get(
-            "https://connect.squareup.com/v2/payments?last_4=0343",
-            config
-        ).then(resp => {
-            const respData = resp.data.payments.map(data => ({
-                id: data.id,
-                refund: data.refunded_money && data.refunded_money.amount || false,
-                total: data.total_money.amount,
-                status: data.status,
-                cardHolder: data.card_details.card.cardholder_name
-            }));
-            res.json(respData);
-        }).catch(err => {
-            res.json({ error: err });
+        getDB(req.headers.blakio_store)["Token"].find({}).then(data => {
+            const {
+                accessTokenOath
+            } = data[0];
+            
+            const token = accessTokenOath;
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Square-Version": "2020-08-26",
+                    "Content-Type": "application/json"
+                }
+            };
+            axios.get(
+                "https://connect.squareup.com/v2/payments?last_4=0343",
+                config
+            ).then(resp => {
+                const respData = resp.data.payments.map(data => ({
+                    id: data.id,
+                    refund: data.refunded_money && data.refunded_money.amount || false,
+                    total: data.total_money.amount,
+                    status: data.status,
+                    cardHolder: data.card_details.card.cardholder_name
+                }));
+                res.json(respData);
+            }).catch(err => {
+                res.json({ error: err });
+            });
         });
     });
 
     app.get("/api/refundPayment", (req, res) => {
-        const token = access_token;
-        const payment_id = "V4RrVpvdqOqY3h79Y5Be1U63uaB";
-        const reason = "testing";
-        const amount_money = {
-            "amount": 100,
-            "currency": "USD"
-        }
-        const data = {
-            amount_money,
-            "idempotency_key": uuidv4(),
-            payment_id,
-            reason
-        }
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Square-Version": "2020-08-26",
-                "Content-Type": "application/json"
+        getDB(req.headers.blakio_store)["Token"].find({}).then(d => {
+            const {
+                accessTokenOath
+            } = d[0];
+            
+            const token = accessTokenOath;
+            const payment_id = "V4RrVpvdqOqY3h79Y5Be1U63uaB";
+            const reason = "testing";
+            const amount_money = {
+                "amount": 100,
+                "currency": "USD"
             }
-        };
-        axios.post(
-            "https://connect.squareup.com/v2/refunds",
-            data,
-            config
-        ).then(resp => {
-            res.json({ success: resp })
-        }).catch(err => res.json({ err }))
+            const data = {
+                amount_money,
+                "idempotency_key": uuidv4(),
+                payment_id,
+                reason
+            }
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Square-Version": "2020-08-26",
+                    "Content-Type": "application/json"
+                }
+            };
+            axios.post(
+                "https://connect.squareup.com/v2/refunds",
+                data,
+                config
+            ).then(resp => {
+                res.json({ success: resp })
+            }).catch(err => res.json({ err }))
+        });
     });
 
     app.post("/api/updateLastTransaction/:database", (req, res) => {
         getDB(req.params.database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
             data[0].paymentId = req.body.paymentId;
             data[0].save(err => {
-                if(err) res.json({err: "error saving"})
-                res.json({success: true})
+                if (err) res.json({ err: "error saving" })
+                res.json({ success: true })
             })
-        }).catch(err => res.json({err}))
+        }).catch(err => res.json({ err }))
+    });
+
+    // GET api/confirmation
+    app.get("/api/confirmation", (req, res) => {
+        const { url } = req;
+        const a = url.replace("/api/confirmation?data=%7B%22", "");
+        const b = a.split("%22,%22");
+        const c = b.map(data => data.replace("%22:%22", "="));
+
+        let transactionId;
+        let database;
+
+        c.forEach(data => {
+            if (data.includes("state")) {
+                const split = data.split("=");
+                database = split[1];
+            } else if (data.includes("transaction_id") && !data.includes("client_transaction_id")) {
+                const split = data.split("=");
+                transactionId = split[1];
+            }
+        });
+
+        getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
+            data[0].paymentId = transactionId;
+            data[0].save(err => {
+                if (err) res.json({ err: "error saving" })
+                res.sendFile('./confirmation/index.html', { root: __dirname })
+            })
+        }).catch(err => res.json({ err }))
+
     })
+
+    // GET api/square/callback
+    app.get("/api/square/callback", (req, res) => {
+        console.log(req)
+        res.send("ok")
+    })
+
+    // // GET api/accessToken
+    // app.get("/api/accessToken", (req, res) => {
+    //     const username = "AVj7DISqu3xid2JT0pv82WPa7iEHx8k39JVZ3OoMT2QA-pGIwcJOQeiDIIZwT2XQVVbpdUuDjcNP4ko4";
+    //     const password = "ENxNp7xsqEZkIpDthMnp0cB7fzDH0RwfCsm_xGYjWFFoWpk1GLAm_G1XRZpZIRUlM7UZdwX__s_-7jn-";
+    //     // const username = "sb-dgdjr2944412_api1.business.example.com";
+    //     // const password = "MdOx3Ne$";
+
+    //     axios({
+    //         url: 'https://api.sandbox.paypal.com/v1/oauth2/token',
+    //         method: 'post',
+    //         headers: {
+    //             'Accept': 'application/json',
+    //             'Accept-Language': 'en_US',
+    //             'content-type': 'application/x-www-form-urlencoded'
+    //         },
+    //         auth: {
+    //             username,
+    //             password
+    //         },
+    //         params: {
+    //             grant_type: 'client_credentials'
+    //         }
+    //     }).then(data => {
+    //         res.send(data.data.access_token)
+    //     }).catch(err => res.send(err))
+    // });
 }

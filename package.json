@@ -24,6 +24,7 @@
     "mongoose": "^5.9.25",
     "morgan": "^1.9.1",
     "nodemon": "^2.0.2",
-    "square-connect": "^4.20200826.3"
+    "square-connect": "*",
+    "uuid": "^8.3.0"
   }
 }

@@ -142,7 +142,32 @@ module.exports = (app) => {
 
     // GET api/confirmation
     app.get("/api/confirmation", (req, res) => {
-        res.sendFile('./confirmation/index.html', { root: __dirname })
+        const {url} = req;
+        const a = url.replace("/api/confirmation?data=%7B%22", "");
+        const b = a.split("%22,%22");
+        const c = b.map(data => data.replace("%22:%22", "="));
+
+        let transactionId;
+        let database;
+
+        c.forEach(data => {
+            if(data.includes("state")){
+                const split = data.split("=");
+                database = split[1];
+            } else if(data.includes("transaction_id") && !data.includes("client_transaction_id")){
+                const split = data.split("=");
+                transactionId = split[1];
+            }
+        });
+
+        getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
+            data[0].paymentId = transactionId;
+            data[0].save(err => {
+                if(err) res.json({err: "error saving"})
+                res.sendFile('./confirmation/index.html', { root: __dirname })
+            })
+        }).catch(err => res.json({err}))
+
     })
 
     // GET api/square/callback

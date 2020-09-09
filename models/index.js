@@ -14,6 +14,7 @@ collections.map(data => {
   connections[data].model('Note',            require('./Note'));
   connections[data].model('Product',         require('./Product'));
   connections[data].model('Transaction',     require('./Transaction'));
+  connections[data].model('Token',           require('./Token'));
 });
 
 module.exports = connections;

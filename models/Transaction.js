@@ -3,10 +3,11 @@ const {
 } = require("mongoose");
 
 const TransactionSchema = new Schema({
-    paymentId: Schema.Types.String,
+    orderId: Schema.Types.String,
     items: [{
         name: String,
-        cost: Number
+        cost: Number,
+        hasRefunded: Boolean
     }]
 });
 

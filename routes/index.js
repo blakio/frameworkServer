@@ -461,12 +461,16 @@ module.exports = (app) => {
         });
     });
 
-    app.get("/api/listPayments", (req, res) => {
+    app.get("/api/listPayments/:query", (req, res) => {
         getDB(req.headers.blakio_store)["Token"].find({}).then(data => {
             const {
                 accessTokenOath
             } = data[0];
-            
+            let query = "";
+            if(req.params.query !== "false"){
+                const split = req.params.query.split("Z");
+                query = `?total=${split[1]}&last_4=${split[0]}`;
+            }
             const token = accessTokenOath;
             const config = {
                 headers: {
@@ -476,15 +480,16 @@ module.exports = (app) => {
                 }
             };
             axios.get(
-                "https://connect.squareup.com/v2/payments?last_4=0343",
+                `https://connect.squareup.com/v2/payments${query}`,
                 config
             ).then(resp => {
                 const respData = resp.data.payments.map(data => ({
-                    id: data.id,
+                    order_id: data.order_id,
                     refund: data.refunded_money && data.refunded_money.amount || false,
                     total: data.total_money.amount,
                     status: data.status,
-                    cardHolder: data.card_details.card.cardholder_name
+                    cardHolder: data.card_details.card.cardholder_name,
+                    last_4: `[${data.card_details.card.last_4}]`,
                 }));
                 res.json(respData);
             }).catch(err => {
@@ -560,7 +565,7 @@ module.exports = (app) => {
         });
 
         getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
-            data[0].paymentId = transactionId;
+            data[0].orderId = transactionId;
             data[0].save(err => {
                 if (err) res.json({ err: "error saving" })
                 res.sendFile('./confirmation/index.html', { root: __dirname })

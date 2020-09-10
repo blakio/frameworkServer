@@ -147,8 +147,11 @@ module.exports = (app) => {
         const hours = split[0].replace("-", "");
         const minutes = split[1];
 
-        const start = moment(day).startOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix()
-        const end = moment(day).endOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix();
+        // const start = moment(day).startOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix()
+        // const end = moment(day).endOf("day")[sign](hours, "hours")[sign](minutes, "minutes").unix();
+        const start = moment(day).startOf("day").unix()
+        const end = moment(day).endOf("day").unix();
+
         const employeeId = mongoose.Types.ObjectId(req.params.id);
         getDB(req.headers.blakio_store).Time.aggregate([
             {

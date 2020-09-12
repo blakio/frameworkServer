@@ -122,7 +122,7 @@ const getTimeWorks = (td, Time, employeeId, res) => {
     }
 }
 
-module.exports = (app) => {
+module.exports = (app, socket) => {
     /**
      * GET
      */
@@ -606,13 +606,9 @@ module.exports = (app) => {
         res.send("ok")
     })
 
-    app.post("/square/webhooks", (req, res) => {
-        console.log("===========================")
-        console.log("===========================")
-        console.log("===========================")
-        console.log("===========================")
-        console.log(req)
-        res.json({req})
+    app.get("/square/webhooks", (req, res) => {
+        socket.emit("payment", {req: req.data})
+        res.json({success: "success"})
     })
 
     // // GET api/accessToken

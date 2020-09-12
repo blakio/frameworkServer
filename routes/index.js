@@ -608,6 +608,7 @@ module.exports = (app) => {
 
     app.post("/square/webhooks", (req, res) => {
         console.log(req)
+        res.json({req})
     })
 
     // // GET api/accessToken

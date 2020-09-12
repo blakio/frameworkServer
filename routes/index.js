@@ -606,7 +606,7 @@ module.exports = (app) => {
         res.send("ok")
     })
 
-    app.get("/square/webhooks", (req, res) => {
+    app.post("/square/webhooks", (req, res) => {
         console.log(req)
     })
 

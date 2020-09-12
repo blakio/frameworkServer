@@ -619,7 +619,7 @@ module.exports = (app, socket) => {
             res.json({
                 headers: req.headers,
                 // url: req.url,
-                // statusMessage: req.statusMessage,
+                statusMessage: req.statusMessage,
                 // client: req.client,
                 // params: req.params,
                 body: req.body

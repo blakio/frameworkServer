@@ -606,6 +606,10 @@ module.exports = (app) => {
         res.send("ok")
     })
 
+    app.get("/square/webhooks", (req, res) => {
+        console.log(req)
+    })
+
     // // GET api/accessToken
     // app.get("/api/accessToken", (req, res) => {
     //     const username = "AVj7DISqu3xid2JT0pv82WPa7iEHx8k39JVZ3OoMT2QA-pGIwcJOQeiDIIZwT2XQVVbpdUuDjcNP4ko4";

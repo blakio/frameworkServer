@@ -612,10 +612,13 @@ module.exports = (app, socket) => {
         }
         if(req.data){
             socket.emit("payment", {data: "req.data"})
+            res.json({success: "req.data"})
         } else if(req){
             socket.emit("payment", {data: "req"})
+            res.json({success: "req"})
         } else {
             socket.emit("payment", {data: "none"})
+            res.json({success: "none"})
         }
         res.json({success: "success"})
     })

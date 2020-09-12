@@ -621,8 +621,8 @@ module.exports = (app, socket) => {
                 // url: req.url,
                 // statusMessage: req.statusMessage,
                 // client: req.client,
-                // params: req.params,
-                // body: req.params
+                params: req.params,
+                body: req.params
             })
         } else {
             socket.emit("payment", {data: "none"})

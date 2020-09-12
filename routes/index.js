@@ -501,15 +501,17 @@ module.exports = (app) => {
         });
     });
 
-    app.get("/api/refundPayment", (req, res) => {
+    app.post("/api/refundPayment", (req, res) => {
         getDB(req.headers.blakio_store)["Token"].find({}).then(d => {
             const {
                 accessTokenOath
             } = d[0];
             
             const token = accessTokenOath;
-            const payment_id = "V4RrVpvdqOqY3h79Y5Be1U63uaB";
-            const reason = "testing";
+            const {
+                payment_id
+            } = req.body;
+            const reason = "customer refund";
             const amount_money = {
                 "amount": 100,
                 "currency": "USD"
@@ -549,31 +551,46 @@ module.exports = (app) => {
 
     // GET api/confirmation
     app.get("/api/confirmation", (req, res) => {
+
         const { url } = req;
         const a = url.replace("/api/confirmation?data=%7B%22", "");
         const b = a.split("%22,%22");
         const c = b.map(data => data.replace("%22:%22", "="));
 
-        let transactionId;
         let database;
 
         c.forEach(data => {
             if (data.includes("state")) {
                 const split = data.split("=");
                 database = split[1];
-            } else if (data.includes("transaction_id") && !data.includes("client_transaction_id")) {
-                const split = data.split("=");
-                transactionId = split[1];
             }
         });
 
-        getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
-            data[0].orderId = transactionId;
-            data[0].save(err => {
-                if (err) res.json({ err: "error saving" })
-                res.sendFile('./confirmation/index.html', { root: __dirname })
-            })
-        }).catch(err => res.json({ err }))
+        getDB(database)["Token"].find({}).then(data => {
+            const {
+                accessTokenOath
+            } = data[0];
+
+            axios.get("https://connect.squareup.com/v2/payments?sort_order=DESC", {
+                headers: {
+                    "Square-Version": "2020-08-26",
+                    "Authorization": `Bearer ${accessTokenOath}`,
+                    "Content-Type": "application/json",
+                    "timeout": 10000
+                }
+            }).then(data => {
+                paymentId = data.data.payments[0].id;
+
+                getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
+                    data[0].paymentId = paymentId;
+                    data[0].save(err => {
+                        if (err) res.json({ err: "error saving" })
+                        res.sendFile('./confirmation/index.html', { root: __dirname })
+                    })
+                }).catch(err => res.json({ err }))
+            }).catch(err => res.json({err}));
+        });
+
 
     })
 

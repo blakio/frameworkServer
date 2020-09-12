@@ -620,8 +620,8 @@ module.exports = (app, socket) => {
                 headers: req.headers,
                 // url: req.url,
                 // statusMessage: req.statusMessage,
-                client: req.client,
-                // params: req.params,
+                // client: req.client,
+                params: req.params,
                 body: req.body
             })
         } else {

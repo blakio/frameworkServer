@@ -607,6 +607,10 @@ module.exports = (app) => {
     })
 
     app.post("/square/webhooks", (req, res) => {
+        console.log("===========================")
+        console.log("===========================")
+        console.log("===========================")
+        console.log("===========================")
         console.log(req)
         res.json({req})
     })

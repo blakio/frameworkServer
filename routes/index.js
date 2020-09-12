@@ -611,9 +611,9 @@ module.exports = (app, socket) => {
             res.json({err: "no socket"})
         }
         if(req.data){
-            socket.emit("payment", {req: req.data, data: "req.data"})
+            socket.emit("payment", {data: "req.data"})
         } else if(req){
-            socket.emit("payment", {req: req, data: "req"})
+            socket.emit("payment", {data: "req"})
         } else {
             socket.emit("payment", {data: "none"})
         }

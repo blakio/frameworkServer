@@ -618,11 +618,11 @@ module.exports = (app, socket) => {
             socket.emit("payment", {data: "req"})
             res.json({
                 headers: req.headers,
-                url: req.url,
-                statusMessage: req.statusMessage,
-                client: req.client,
-                params: req.params,
-                body: req.params
+                // url: req.url,
+                // statusMessage: req.statusMessage,
+                // client: req.client,
+                // params: req.params,
+                // body: req.params
             })
         } else {
             socket.emit("payment", {data: "none"})

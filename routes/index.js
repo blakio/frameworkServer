@@ -618,7 +618,7 @@ module.exports = (app, socket) => {
             socket.emit("payment", {data: "req"})
             res.json({
                 headers: req.headers,
-                url: req.url,
+                // url: req.url,
                 // statusMessage: req.statusMessage,
                 // client: req.client,
                 // params: req.params,

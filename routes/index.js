@@ -606,7 +606,7 @@ module.exports = (app, socket) => {
         res.send("ok")
     })
 
-    app.get("/square/webhooks", (req, res) => {
+    app.post("/square/webhooks", (req, res) => {
         socket.emit("payment", {req: req.data})
         res.json({success: "success"})
     })

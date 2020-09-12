@@ -617,12 +617,12 @@ module.exports = (app, socket) => {
             const keys = Object.keys(req);
             socket.emit("payment", {data: "req"})
             res.json({
-                headers: data.headers,
-                url: data.url,
-                statusMessage: data.statusMessage,
-                client: data.client,
-                params: data.params,
-                body: data.params
+                headers: req.headers,
+                url: req.url,
+                statusMessage: req.statusMessage,
+                client: req.client,
+                params: req.params,
+                body: req.params
             })
         } else {
             socket.emit("payment", {data: "none"})

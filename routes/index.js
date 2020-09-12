@@ -616,13 +616,61 @@ module.exports = (app, socket) => {
         } else if(req){
             const keys = Object.keys(req);
             socket.emit("payment", {data: "req"})
-            res.json({success: JSON.stringify(keys)})
+            res.json({
+                headers: data.headers,
+                url: data.url,
+                statusMessage: data.statusMessage,
+                client: data.client,
+                params: data.params,
+                body: data.params
+            })
         } else {
             socket.emit("payment", {data: "none"})
             res.json({success: "none"})
         }
         res.json({success: "success"})
     })
+
+
+    // 0: "_readableState"
+    // 1: "readable"
+    // 2: "_events"
+    // 3: "_eventsCount"
+    // 4: "_maxListeners"
+    // 5: "socket"
+    // 6: "connection"
+    // 7: "httpVersionMajor"
+    // 8: "httpVersionMinor"
+    // 9: "httpVersion"
+    // 10: "complete"
+    // 11: "headers"
+    // 12: "rawHeaders"
+    // 13: "trailers"
+    // 14: "rawTrailers"
+    // 15: "aborted"
+    // 16: "upgrade"
+    // 17: "url"
+    // 18: "method"
+    // 19: "statusCode"
+    // 20: "statusMessage"
+    // 21: "client"
+    // 22: "_consuming"
+    // 23: "_dumped"
+    // 24: "next"
+    // 25: "baseUrl"
+    // 26: "originalUrl"
+    // 27: "_parsedUrl"
+    // 28: "params"
+    // 29: "query"
+    // 30: "res"
+    // 31: "_startAt"
+    // 32: "_startTime"
+    // 33: "_remoteAddress"
+    // 34: "body"
+    // 35: "secret"
+    // 36: "cookies"
+    // 37: "signedCookies"
+    // 38: "route"
 
     // // GET api/accessToken
     // app.get("/api/accessToken", (req, res) => {

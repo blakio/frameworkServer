@@ -558,11 +558,15 @@ module.exports = (app) => {
         const c = b.map(data => data.replace("%22:%22", "="));
 
         let database;
+        let orderId;
 
         c.forEach(data => {
             if (data.includes("state")) {
                 const split = data.split("=");
                 database = split[1];
+            } else if (data.includes("transaction_id") && !data.includes("client_transaction_id")) {
+                const split = data.split("=");
+                orderId = split[1];
             }
         });
 
@@ -583,6 +587,8 @@ module.exports = (app) => {
 
                 getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
                     data[0].paymentId = paymentId;
+                    data[0].orderId = orderId;
+
                     data[0].save(err => {
                         if (err) res.json({ err: "error saving" })
                         res.sendFile('./confirmation/index.html', { root: __dirname })

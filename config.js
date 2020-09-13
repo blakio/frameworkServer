@@ -5,6 +5,9 @@ module.exports = {
         westPhillyProduce: "westPhillyProduce",
         wellnessAndCompany: "wellnessAndCompany"
     },
+    merchantIdToDatabase: {
+        MLFCVCSGSVM2K: "dashboard"
+    },
     pinMapper: {
         blko: "blakio",
         wppd: "westPhillyProduce",

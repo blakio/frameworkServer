@@ -34,7 +34,11 @@ const scopes = [
     "ORDERS_WRITE",
     "ORDERS_READ",
 
-    "CUSTOMERS_READ"
+    "CUSTOMERS_READ",
+
+    "ORDERS_WRITE",
+    "ORDERS_READ",
+    "PAYMENTS_WRITE"
 ];
 
 const {
@@ -413,17 +417,17 @@ module.exports = (app, socket) => {
             console.log(req.query)
             // Verify the state to protect against cross-site request forgery.
             if (req.cookies["Auth_State"] !== req.query['state']) {
-                res.json({ error: "Invalid state parameter." })
+                res.json({ error: "Invalid state parameter.", e: "1" })
             }
     
             else if (req.query['error']) {
                 // Check to see if the seller clicked the Deny button and handle it as a special case.
                 if (("access_denied" === req.query['error']) && ("user_denied" === req.query["error_description"])) {
-                    res.json({ error: "You chose to deny access to the app." })
+                    res.json({ error: "You chose to deny access to the app.", e: "2" })
                 }
                 // Display the error and description for all other errors.
                 else {
-                    res.json({ error: eq.query["error_description"] })
+                    res.json({ error: eq.query["error_description"], e: "3" })
                 }
             }
             // When the response_type is "code", the seller clicked Allow
@@ -454,12 +458,12 @@ module.exports = (app, socket) => {
                     })
                     // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
                     .catch(error => {
-                        res.json({ error: error.response.body.message })
+                        res.json({ error: error.response.body.message, e: "4" })
                     })
             }
             else {
                 // No recognizable parameters were returned.
-                res.json({ error: "Expected parameters were not returned" })
+                res.json({ error: "Expected parameters were not returned", e: "5" })
             }
         });
     });
@@ -610,6 +614,62 @@ module.exports = (app, socket) => {
         socket.emit("payment", {data: req.body});
         res.json({success: "success"})
     })
+
+// const data = {
+//     created_at: "2020-09-13T02:14:17.982Z",
+//     data: {
+//         id: "xoW5BAAZNXoskSOgQOMrkXyluaB",
+//         object: {
+//             payment: {
+//                 amount_money: {
+//                     amount: 100,
+//                     currency: "USD"
+//                 },
+//                 card_details: {
+//                     auth_result_code: "181649",
+//                     avs_status: "AVS_NOT_CHECKED",
+//                     card: {
+//                         bin: "425637",
+//                         card_brand: "VISA",
+//                         card_type: "DEBIT",
+//                         cardholder_name: "LLC/BLAKIO",
+//                         exp_month: 9,
+//                         exp_year: 2023,
+//                         fingerprint: "sq-1-GCLA1HNsQwWyTfIXp6jpL9OViq_-M2d4-_oqoJUQ-JDCo6fqlUv9lLCO1HBeafy_gA",
+//                         last_4: "0343",
+//                         prepaid_type: "NOT_PREPAID"
+//                     },
+//                     cvv_status: "CVV_NOT_CHECKED",
+//                     device_details: {
+//                         device_id: "DEVICE_INSTALLATION_ID:CC2D6574-7799-4F97-9F0F-2AF5363DA021",
+//                         device_installation_id: "CC2D6574-7799-4F97-9F0F-2AF5363DA021",
+//                         device_name: "iPad"
+//                     },
+//                     entry_method: "SWIPED",
+//                     statement_description: "SQ *BLAKIO",
+//                     status: "AUTHORIZED"
+//                 },
+//                 created_at: "2020-09-13T02:14:17.758Z",
+//                 id: "xoW5BAAZNXoskSOgQOMrkXyluaB",
+//                 location_id: "LP2ZC6A81DA3V",
+//                 order_id: "RI1WqKg9lkvAR4v4VxyPKMAfV",
+//                 receipt_number: "xoW5",
+//                 source_type: "CARD",
+//                 status: "APPROVED",
+//                 total_money: {
+//                     amount: 100,
+//                     currency: "USD"
+//                 },
+//                 updated_at: "2020-09-13T02:14:17.978Z",
+//                 version: 1
+//             }
+//         },
+//         type: "payment"
+//     },
+//     event_id: "5116a24f-7861-414b-9268-f69517252614",
+//     merchant_id: "MLFCVCSGSVM2K",
+//     type: "payment.created"
+// }
 
     // 0: "_readableState"
     // 1: "readable"

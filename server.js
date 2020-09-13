@@ -18,7 +18,8 @@ app.use(express.json());
 app.use(cors());
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
-require("./routes")(app, socket);
+// require("./routes")(app, socket);
+require("./routes")(app);
 
 app.listen(PORT, () => console.log(`App running on port ${PORT}!`));
 // server.listen(PORT, () => console.log(`App running on port ${PORT}!`));

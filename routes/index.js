@@ -21,7 +21,7 @@ defaultClient.basePath = BASEURL
 const oauthInstance = new SquareConnect.OAuthApi();
 const scopes = [
     "ITEMS_READ",
-    
+
     "MERCHANT_PROFILE_READ",
 
     "PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS",
@@ -406,11 +406,11 @@ module.exports = (app, socket) => {
      *  code: the authorization code
      */
     app.get('/api/sandbox_callback', (req, res) => {
-        getDB("blakio")["Token"].find({}).then(data => {
+        getDB("blakio")["Token"].find({}).then(dbTokens => {
             const {
                 applicationId,
                 accessTokenSecret
-            } = data[0];
+            } = dbTokens[0];
             
             console.log(req.query)
             // Verify the state to protect against cross-site request forgery.
@@ -443,15 +443,17 @@ module.exports = (app, socket) => {
                 }
                 oauthInstance.obtainToken(body)
                     // Extract the returned access token from the ObtainTokenResponse object
-                    .then(data => {
+                    .then(newData => {
                         // Because we want to keep things simple and we're using Sandbox,
                         // we call a function that writes the tokens to the page so we can easily copy and use them directly.
                         // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
-                        res.json({
-                            access_token: data.access_token,
-                            refresh_token: data.refresh_token,
-                            expires_at: data.expires_at,
-                            merchant_id: data.merchant_id
+                        dbTokens[0].access_token = newData.access_token;
+                        dbTokens[0].refresh_token = newData.refresh_token;
+                        dbTokens[0].expires_at = newData.expires_at;
+                        dbTokens[0].merchant_id = newData.merchant_id;
+                        dbTokens[0].save(err => {
+                            if (err) res.json({ err: "error saving tokens" })
+                            res.json({ success: true })
                         })
                     })
                     // The response from the Obtain Token endpoint did not include an access token. Something went wrong.

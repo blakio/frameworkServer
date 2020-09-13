@@ -437,7 +437,7 @@ module.exports = (app, socket) => {
                 // Provide the code in a request to the Obtain Token endpoint
                 var body = {
                     client_id: "sq0idp-4CVw5fpKwLHOxXyqa1LoZQ",
-                    client_secret: "EAAAECYO2279a_jgBqnzmXPGE19IouASfJ9WAa0Ub_M4luqrT4Ijd01XYyP-mQ7v",
+                    client_secret: "EAAAECz1q9Fbhcq_cb1mflep8_z2YnNFisoWAi-lXN1mNYQUwaCL-vRHtycM6Di0",
                     code: code,
                     grant_type: 'authorization_code'
                 }

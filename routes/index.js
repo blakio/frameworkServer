@@ -406,7 +406,7 @@ module.exports = (app, socket) => {
      *  code: the authorization code
      */
     app.get('/api/sandbox_callback', (req, res) => {
-        getDB("blakio")["Token"].find({}).then(dbTokens => {
+        // getDB("blakio")["Token"].find({}).then(dbTokens => {
             const {
                 applicationId,
                 accessTokenSecret
@@ -447,13 +447,19 @@ module.exports = (app, socket) => {
                         // Because we want to keep things simple and we're using Sandbox,
                         // we call a function that writes the tokens to the page so we can easily copy and use them directly.
                         // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
-                        dbTokens[0].access_token = newData.access_token;
-                        dbTokens[0].refresh_token = newData.refresh_token;
-                        dbTokens[0].expires_at = newData.expires_at;
-                        dbTokens[0].merchant_id = newData.merchant_id;
-                        dbTokens[0].save(err => {
-                            if (err) res.json({ err: "error saving tokens" })
-                            res.json({ success: true })
+                        // dbTokens[0].access_token = newData.access_token;
+                        // dbTokens[0].refresh_token = newData.refresh_token;
+                        // dbTokens[0].expires_at = newData.expires_at;
+                        // dbTokens[0].merchant_id = newData.merchant_id;
+                        // dbTokens[0].save(err => {
+                        //     if (err) res.json({ err: "error saving tokens" })
+                        //     res.json({ success: true })
+                        // })
+                        res.json({
+                            access_token: newData.access_token
+                            refresh_token: newData.refresh_token
+                            expires_at: newData.expires_at
+                            merchant_id: newData.merchant_id
                         })
                     })
                     // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
@@ -465,7 +471,7 @@ module.exports = (app, socket) => {
                 // No recognizable parameters were returned.
                 res.json({ error: "Expected parameters were not returned", e: "5" })
             }
-        });
+        // });
     });
 
     app.get("/api/listPayments/:query", (req, res) => {

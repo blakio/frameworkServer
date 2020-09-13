@@ -456,9 +456,9 @@ module.exports = (app, socket) => {
                         //     res.json({ success: true })
                         // })
                         res.json({
-                            access_token: newData.access_token
-                            refresh_token: newData.refresh_token
-                            expires_at: newData.expires_at
+                            access_token: newData.access_token,
+                            refresh_token: newData.refresh_token,
+                            expires_at: newData.expires_at,
                             merchant_id: newData.merchant_id
                         })
                     })

@@ -607,28 +607,8 @@ module.exports = (app, socket) => {
     })
 
     app.post("/square/webhooks", (req, res) => {
-        if(!socket){
-            res.json({err: "no socket"})
-        }
-        if(req.data){
-            socket.emit("payment", {data: "req.data"})
-            res.json({success: "req.data"})
-        } else if(req){
-            const keys = Object.keys(req);
-            socket.emit("payment", {data: req.body});
-            res.json({
-                succes: true
-                // headers: req.headers,
-                // url: req.url,
-                // statusMessage: req.statusMessage,
-                // client: req.client,
-                // params: req.params,
-                // body: req.body
-            })
-        } else {
-            socket.emit("payment", {data: "none"})
-            res.json({success: "none"})
-        }
+        const keys = Object.keys(req);
+        socket.emit("payment", {data: req.body});
         res.json({success: "success"})
     })
 

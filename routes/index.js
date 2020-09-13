@@ -614,8 +614,8 @@ module.exports = (app, socket) => {
             socket.emit("payment", {data: "req.data"})
             res.json({success: "req.data"})
         } else if(req){
-            const keys = Object.keys(req);
-            socket.emit("payment", {data: "req"})
+            // const keys = Object.keys(req);
+            // socket.emit("payment", {data: "req"})
             res.json({
                 headers: req.headers,
                 // url: req.url,

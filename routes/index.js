@@ -406,13 +406,12 @@ module.exports = (app, socket) => {
      *  code: the authorization code
      */
     app.get('/api/sandbox_callback', (req, res) => {
-        // getDB("blakio")["Token"].find({}).then(dbTokens => {
-            // const {
-            //     applicationId,
-            //     accessTokenSecret
-            // } = dbTokens[0];
+        getDB("blakio")["Token"].find({}).then(dbTokens => {
+            const {
+                applicationId,
+                accessTokenSecret
+            } = dbTokens[0];
             
-            console.log(req.query)
             // Verify the state to protect against cross-site request forgery.
             if (req.cookies["Auth_State"] !== req.query['state']) {
                 res.json({ error: "Invalid state parameter.", e: "1" })
@@ -436,30 +435,26 @@ module.exports = (app, socket) => {
     
                 // Provide the code in a request to the Obtain Token endpoint
                 var body = {
-                    client_id: "sq0idp-4CVw5fpKwLHOxXyqa1LoZQ",
-                    client_secret: "EAAAECz1q9Fbhcq_cb1mflep8_z2YnNFisoWAi-lXN1mNYQUwaCL-vRHtycM6Di0",
+                    client_id: applicationId,
+                    client_secret: accessTokenSecret,
                     code: code,
-                    grant_type: 'authorization_code'
+                    grant_type: 'authorization_code',
                 }
+                console.log(body)
+
                 oauthInstance.obtainToken(body)
                     // Extract the returned access token from the ObtainTokenResponse object
                     .then(newData => {
                         // Because we want to keep things simple and we're using Sandbox,
                         // we call a function that writes the tokens to the page so we can easily copy and use them directly.
                         // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
-                        // dbTokens[0].access_token = newData.access_token;
-                        // dbTokens[0].refresh_token = newData.refresh_token;
-                        // dbTokens[0].expires_at = newData.expires_at;
-                        // dbTokens[0].merchant_id = newData.merchant_id;
-                        // dbTokens[0].save(err => {
-                        //     if (err) res.json({ err: "error saving tokens" })
-                        //     res.json({ success: true })
-                        // })
-                        res.json({
-                            access_token: newData.access_token,
-                            refresh_token: newData.refresh_token,
-                            expires_at: newData.expires_at,
-                            merchant_id: newData.merchant_id
+                        dbTokens[0].access_token = newData.access_token;
+                        dbTokens[0].refresh_token = newData.refresh_token;
+                        dbTokens[0].expires_at = newData.expires_at;
+                        dbTokens[0].merchant_id = newData.merchant_id;
+                        dbTokens[0].save(err => {
+                            if (err) res.json({ err: "error saving tokens" })
+                            res.json({ success: true })
                         })
                     })
                     // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
@@ -471,7 +466,7 @@ module.exports = (app, socket) => {
                 // No recognizable parameters were returned.
                 res.json({ error: "Expected parameters were not returned", e: "5" })
             }
-        // });
+        });
     });
 
     app.get("/api/listPayments/:query", (req, res) => {
@@ -497,7 +492,7 @@ module.exports = (app, socket) => {
                 config
             ).then(resp => {
                 const respData = resp.data.payments.map(data => ({
-                    order_id: data.order_id,
+                    payment_id: data.id,
                     refund: data.refunded_money && data.refunded_money.amount || false,
                     total: data.total_money.amount,
                     status: data.status,
@@ -561,63 +556,26 @@ module.exports = (app, socket) => {
 
     // GET api/confirmation
     app.get("/api/confirmation", (req, res) => {
+        res.sendFile('./confirmation/index.html', { root: __dirname })
+    });
 
-        const { url } = req;
-        const a = url.replace("/api/confirmation?data=%7B%22", "");
-        const b = a.split("%22,%22");
-        const c = b.map(data => data.replace("%22:%22", "="));
+    app.post("/api/square/setPaymentIdWithLastTransaction", (req, res) => {
+        const {
+            database,
+            paymentId
+        } = req.body;
+        getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
+            data[0].paymentId = paymentId;
 
-        let database;
-        let orderId;
-
-        c.forEach(data => {
-            if (data.includes("state")) {
-                const split = data.split("=");
-                database = split[1];
-            } else if (data.includes("transaction_id") && !data.includes("client_transaction_id")) {
-                const split = data.split("=");
-                orderId = split[1];
-            }
-        });
-
-        getDB(database)["Token"].find({}).then(data => {
-            const {
-                accessTokenOath
-            } = data[0];
-
-            axios.get("https://connect.squareup.com/v2/payments?sort_order=DESC", {
-                headers: {
-                    "Square-Version": "2020-08-26",
-                    "Authorization": `Bearer ${accessTokenOath}`,
-                    "Content-Type": "application/json",
-                    "timeout": 10000
-                }
-            }).then(data => {
-                paymentId = data.data.payments[0].id;
-
-                getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
-                    data[0].paymentId = paymentId;
-                    data[0].orderId = orderId;
-
-                    data[0].save(err => {
-                        if (err) res.json({ err: "error saving" })
-                        res.sendFile('./confirmation/index.html', { root: __dirname })
-                    })
-                }).catch(err => res.json({ err }))
-            }).catch(err => res.json({err}));
-        });
-
-
-    })
-
-    // GET api/square/callback
-    app.get("/api/square/callback", (req, res) => {
-        console.log(req)
-        res.send("ok")
-    })
+            data[0].save(err => {
+                if (err) res.json({ err: "error saving" })
+                res.json({sucess: true})
+            })
+        }).catch(err => res.json({ err }))
+    });
 
     app.post("/square/webhooks", (req, res) => {
         socket.emit("payment", {data: req.body});
         res.json({success: "success"})
-    })
+    });
 }

@@ -124,7 +124,7 @@ const getTimeWorks = (td, Time, employeeId, res) => {
     }
 }
 
-module.exports = (app, socket) => {
+module.exports = (app, io) => {
     /**
      * GET
      */
@@ -544,6 +544,28 @@ module.exports = (app, socket) => {
         });
     });
 
+    app.post("/api/updateRefundStatus", (req, res) => {
+        const {
+            selectedId,
+            paymentId
+        } = req.body;
+        getDB(req.headers.blakio_store)["Transaction"].find({
+            paymentId
+        }).then(transactions => {
+            let found = false;
+            transactions[0].items.map(data => {
+                // double equals because data._id is type object
+                if(data._id == selectedId){
+                    data.hasRefunded = true;
+                }
+            })
+            transactions[0].save(err => {
+                if (err) res.json({ err: "error saving" })
+                res.json({sucess: true})
+            })
+        }).catch(err => res.json({err}));
+    });
+
     app.post("/api/updateLastTransaction/:database", (req, res) => {
         getDB(req.params.database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
             data[0].paymentId = req.body.paymentId;
@@ -575,7 +597,7 @@ module.exports = (app, socket) => {
     });
 
     app.post("/square/webhooks", (req, res) => {
-        socket.emit("payment", {data: req.body});
+        io.sockets.emit("payment", {data: req.body});
         res.json({success: "success"})
     });
 }

@@ -441,26 +441,26 @@ module.exports = (app, socket) => {
                     code: code,
                     grant_type: 'authorization_code',
                 }
-                res.json(body)
-                // oauthInstance.obtainToken(body)
-                //     // Extract the returned access token from the ObtainTokenResponse object
-                //     .then(newData => {
-                //         // Because we want to keep things simple and we're using Sandbox,
-                //         // we call a function that writes the tokens to the page so we can easily copy and use them directly.
-                //         // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
-                //         dbTokens[0].access_token = newData.access_token;
-                //         dbTokens[0].refresh_token = newData.refresh_token;
-                //         dbTokens[0].expires_at = newData.expires_at;
-                //         dbTokens[0].merchant_id = newData.merchant_id;
-                //         dbTokens[0].save(err => {
-                //             if (err) res.json({ err: "error saving tokens" })
-                //             res.json({ success: true })
-                //         })
-                //     })
-                //     // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
-                //     .catch(error => {
-                //         res.json({ error: error.response.body.message, e: "4" })
-                //     })
+                oauthInstance.obtainToken(body)
+                    // Extract the returned access token from the ObtainTokenResponse object
+                    .then(newData => {
+                        // Because we want to keep things simple and we're using Sandbox,
+                        // we call a function that writes the tokens to the page so we can easily copy and use them directly.
+                        // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
+                        res.send("ok")
+                        // dbTokens[0].access_token = newData.access_token;
+                        // dbTokens[0].refresh_token = newData.refresh_token;
+                        // dbTokens[0].expires_at = newData.expires_at;
+                        // dbTokens[0].merchant_id = newData.merchant_id;
+                        // dbTokens[0].save(err => {
+                        //     if (err) res.json({ err: "error saving tokens" })
+                        //     res.json({ success: true })
+                        // })
+                    })
+                    // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
+                    .catch(error => {
+                        res.json({ error: error.response.body.message, e: "4" })
+                    })
             }
             else {
                 // No recognizable parameters were returned.

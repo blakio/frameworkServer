@@ -21,7 +21,9 @@ defaultClient.basePath = BASEURL
 const oauthInstance = new SquareConnect.OAuthApi();
 const scopes = [
     "ITEMS_READ",
+    
     "MERCHANT_PROFILE_READ",
+
     "PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS",
     "PAYMENTS_WRITE",
     "PAYMENTS_READ",
@@ -34,11 +36,7 @@ const scopes = [
     "ORDERS_WRITE",
     "ORDERS_READ",
 
-    "CUSTOMERS_READ",
-
-    "ORDERS_WRITE",
-    "ORDERS_READ",
-    "PAYMENTS_WRITE"
+    "CUSTOMERS_READ"
 ];
 
 const {

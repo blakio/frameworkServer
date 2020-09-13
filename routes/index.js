@@ -607,7 +607,6 @@ module.exports = (app, socket) => {
     })
 
     app.post("/square/webhooks", (req, res) => {
-        const keys = Object.keys(req);
         socket.emit("payment", {data: req.body});
         res.json({success: "success"})
     })

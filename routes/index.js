@@ -406,66 +406,67 @@ module.exports = (app, socket) => {
      *  code: the authorization code
      */
     app.get('/api/sandbox_callback', (req, res) => {
-        getDB("blakio")["Token"].find({}).then(dbTokens => {
-            const {
-                applicationId,
-                accessTokenSecret
-            } = dbTokens[0];
+        res.send("hey")
+        // getDB("blakio")["Token"].find({}).then(dbTokens => {
+        //     const {
+        //         applicationId,
+        //         accessTokenSecret
+        //     } = dbTokens[0];
             
-            console.log(req.query)
-            // Verify the state to protect against cross-site request forgery.
-            if (req.cookies["Auth_State"] !== req.query['state']) {
-                res.json({ error: "Invalid state parameter.", e: "1" })
-            }
+        //     console.log(req.query)
+        //     // Verify the state to protect against cross-site request forgery.
+        //     if (req.cookies["Auth_State"] !== req.query['state']) {
+        //         res.json({ error: "Invalid state parameter.", e: "1" })
+        //     }
     
-            else if (req.query['error']) {
-                // Check to see if the seller clicked the Deny button and handle it as a special case.
-                if (("access_denied" === req.query['error']) && ("user_denied" === req.query["error_description"])) {
-                    res.json({ error: "You chose to deny access to the app.", e: "2" })
-                }
-                // Display the error and description for all other errors.
-                else {
-                    res.json({ error: eq.query["error_description"], e: "3" })
-                }
-            }
-            // When the response_type is "code", the seller clicked Allow
-            // and the authorization page returned the auth tokens.
-            else if ("code" === req.query["response_type"]) {
-                // Extract the returned authorization code from the URL
-                var code = req.query.code
+        //     else if (req.query['error']) {
+        //         // Check to see if the seller clicked the Deny button and handle it as a special case.
+        //         if (("access_denied" === req.query['error']) && ("user_denied" === req.query["error_description"])) {
+        //             res.json({ error: "You chose to deny access to the app.", e: "2" })
+        //         }
+        //         // Display the error and description for all other errors.
+        //         else {
+        //             res.json({ error: eq.query["error_description"], e: "3" })
+        //         }
+        //     }
+        //     // When the response_type is "code", the seller clicked Allow
+        //     // and the authorization page returned the auth tokens.
+        //     else if ("code" === req.query["response_type"]) {
+        //         // Extract the returned authorization code from the URL
+        //         var code = req.query.code
     
-                // Provide the code in a request to the Obtain Token endpoint
-                var body = {
-                    client_id: applicationId,
-                    client_secret: accessTokenSecret,
-                    code: code,
-                    grant_type: 'authorization_code',
-                }
-                oauthInstance.obtainToken(body)
-                    // Extract the returned access token from the ObtainTokenResponse object
-                    .then(newData => {
-                        // Because we want to keep things simple and we're using Sandbox,
-                        // we call a function that writes the tokens to the page so we can easily copy and use them directly.
-                        // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
-                        dbTokens[0].access_token = newData.access_token;
-                        dbTokens[0].refresh_token = newData.refresh_token;
-                        dbTokens[0].expires_at = newData.expires_at;
-                        dbTokens[0].merchant_id = newData.merchant_id;
-                        dbTokens[0].save(err => {
-                            if (err) res.json({ err: "error saving tokens" })
-                            res.json({ success: true })
-                        })
-                    })
-                    // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
-                    .catch(error => {
-                        res.json({ error: error.response.body.message, e: "4" })
-                    })
-            }
-            else {
-                // No recognizable parameters were returned.
-                res.json({ error: "Expected parameters were not returned", e: "5" })
-            }
-        });
+        //         // Provide the code in a request to the Obtain Token endpoint
+        //         var body = {
+        //             client_id: applicationId,
+        //             client_secret: accessTokenSecret,
+        //             code: code,
+        //             grant_type: 'authorization_code',
+        //         }
+        //         oauthInstance.obtainToken(body)
+        //             // Extract the returned access token from the ObtainTokenResponse object
+        //             .then(newData => {
+        //                 // Because we want to keep things simple and we're using Sandbox,
+        //                 // we call a function that writes the tokens to the page so we can easily copy and use them directly.
+        //                 // In production, you should never write tokens to the page. You should encrypt the tokens and handle them securely.
+        //                 dbTokens[0].access_token = newData.access_token;
+        //                 dbTokens[0].refresh_token = newData.refresh_token;
+        //                 dbTokens[0].expires_at = newData.expires_at;
+        //                 dbTokens[0].merchant_id = newData.merchant_id;
+        //                 dbTokens[0].save(err => {
+        //                     if (err) res.json({ err: "error saving tokens" })
+        //                     res.json({ success: true })
+        //                 })
+        //             })
+        //             // The response from the Obtain Token endpoint did not include an access token. Something went wrong.
+        //             .catch(error => {
+        //                 res.json({ error: error.response.body.message, e: "4" })
+        //             })
+        //     }
+        //     else {
+        //         // No recognizable parameters were returned.
+        //         res.json({ error: "Expected parameters were not returned", e: "5" })
+        //     }
+        // });
     });
 
     app.get("/api/listPayments/:query", (req, res) => {

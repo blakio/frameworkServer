@@ -614,15 +614,16 @@ module.exports = (app, socket) => {
             socket.emit("payment", {data: "req.data"})
             res.json({success: "req.data"})
         } else if(req){
-            // const keys = Object.keys(req);
-            // socket.emit("payment", {data: "req"})
+            const keys = Object.keys(req);
+            socket.emit("payment", {data: keys});
             res.json({
-                headers: req.headers,
+                succes: true
+                // headers: req.headers,
                 // url: req.url,
                 // statusMessage: req.statusMessage,
                 // client: req.client,
                 // params: req.params,
-                body: req.body
+                // body: req.body
             })
         } else {
             socket.emit("payment", {data: "none"})

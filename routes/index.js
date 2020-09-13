@@ -407,10 +407,10 @@ module.exports = (app, socket) => {
      */
     app.get('/api/sandbox_callback', (req, res) => {
         // getDB("blakio")["Token"].find({}).then(dbTokens => {
-            const {
-                applicationId,
-                accessTokenSecret
-            } = dbTokens[0];
+            // const {
+            //     applicationId,
+            //     accessTokenSecret
+            // } = dbTokens[0];
             
             console.log(req.query)
             // Verify the state to protect against cross-site request forgery.

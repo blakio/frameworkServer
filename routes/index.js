@@ -600,4 +600,9 @@ module.exports = (app, io) => {
         io.sockets.emit("payment", {data: req.body});
         res.json({success: "success"})
     });
+
+    app.get("/api/refresh", (req, res) => {
+        io.sockets.emit("refresh", {});
+        res.json({success: "success"})
+    });
 }

@@ -496,8 +496,7 @@ module.exports = (app, io) => {
                     refund: data.refunded_money && data.refunded_money.amount || false,
                     total: data.total_money.amount,
                     status: data.status,
-                    cardHolder: data.card_details.card.cardholder_name,
-                    last_4: `[${data.card_details.card.last_4}]`,
+                    cardHolder: data.card_details.card.cardholder_name
                 }));
                 res.json(respData);
             }).catch(err => {

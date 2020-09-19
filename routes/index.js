@@ -474,11 +474,11 @@ module.exports = (app, io) => {
             const {
                 accessTokenOath
             } = data[0];
-            let query = "";
-            if(req.params.query !== "false"){
-                const split = req.params.query.split("Z");
-                query = `?total=${split[1]}&last_4=${split[0]}`;
-            }
+
+            const {
+                query
+            } = req.params;
+
             const token = accessTokenOath;
             const config = {
                 headers: {
@@ -488,7 +488,7 @@ module.exports = (app, io) => {
                 }
             };
             axios.get(
-                `https://connect.squareup.com/v2/payments${query}`,
+                `https://connect.squareup.com/v2/payments?last_4=${query}`,
                 config
             ).then(resp => {
                 const respData = resp.data.payments.map(data => ({
@@ -584,9 +584,12 @@ module.exports = (app, io) => {
     app.post("/api/square/setPaymentIdWithLastTransaction", (req, res) => {
         const {
             database,
-            paymentId
+            paymentId,
+            last_4
         } = req.body;
-        getDB(database)["Transaction"].find().sort({ _id: -1 }).limit(1).then(data => {
+        getDB(database)["Transaction"].find({
+            last_4,
+        }).sort({ _id: -1 }).limit(1).then(data => {
             data[0].paymentId = paymentId;
 
             data[0].save(err => {

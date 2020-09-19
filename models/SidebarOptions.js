@@ -4,7 +4,8 @@ const {
 
 const SidebarOptionsSchema = new Schema({
     title: String,
-    closedIcon: String
+    closedIcon: String,
+    isActive: Boolean,
 });
 
 module.exports = SidebarOptionsSchema;

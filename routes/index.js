@@ -48,6 +48,10 @@ const getDB = (blakio_store) => {
     return db[routeMapper[blakio_store]].models;
 }
 
+const getDBTokens = async (blakio_store) => {
+    return db[routeMapper[blakio_store]].models["Token"].find({});
+}
+
 const getUpdate = req => {
     const update = {};
     if (req.body.field) update.$push = { [req.body.field]: req.body.data };
@@ -123,6 +127,12 @@ const getTimeWorks = (td, Time, employeeId, res) => {
         })
     }
 }
+
+// var CronJob = require('cron').CronJob;
+// var job = new CronJob('* * * * * *', function() {
+//   console.log('You will see this message every second');
+// }, null, true, 'America/Los_Angeles');
+// job.start();
 
 module.exports = (app, io) => {
     /**
@@ -601,6 +611,43 @@ module.exports = (app, io) => {
     app.post("/square/webhooks", (req, res) => {
         io.sockets.emit("payment", {data: req.body});
         res.json({success: "success"})
+    });
+
+    app.get("/api/refreshToken", (req, res) => {
+        getDBTokens(req.headers.blakio_store).then(tokens => {
+            const {
+                applicationId,
+                applicationSecret,
+                accessTokenSecret,
+                accessTokenOath,
+                refreshToken
+            } = tokens[0];
+            const data = {
+                "client_id": applicationId,
+                "client_secret": applicationSecret,
+                "refresh_token": refreshToken,
+                "grant_type": "refresh_token"
+            };
+            const config = {
+                headers: {
+                    "Square-Version": "2020-08-26",
+                    "Content-Type": "application/json"
+                }
+            };
+
+            axios.post(
+                `${BASEURL}/oauth2/token`,
+                data,
+                config
+            ).then(resp => {
+                tokens[0].accessTokenOath = resp.data.access_token;
+                console.log(resp.data.access_token)
+                tokens[0].save(err => {
+                    if (err) res.json({ err: "error saving tokens" })
+                    res.json({ success: true })
+                })
+            });
+        }).catch(err => console.log(err))
     });
 
     app.get("/api/refresh", (req, res) => {

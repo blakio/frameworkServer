@@ -4,6 +4,7 @@ const {
 
 const TokenSchema = new Schema({
     applicationId: String,
+    applicationSecret: String,
     accessTokenSecret: String,
     accessTokenOath: String,
     refreshToken: String,

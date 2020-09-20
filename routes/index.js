@@ -128,11 +128,47 @@ const getTimeWorks = (td, Time, employeeId, res) => {
     }
 }
 
-// var CronJob = require('cron').CronJob;
-// var job = new CronJob('* * * * * *', function() {
-//   console.log('You will see this message every second');
-// }, null, true, 'America/Los_Angeles');
-// job.start();
+var cron = require('node-cron');
+ 
+cron.schedule('0 0 * * 1', () => {
+  console.log('At 00:00 on Monday.');
+  const dbs = ["blakio"];
+  dbs.forEach(db => {
+    getDBTokens(db).then(tokens => {
+        const {
+            applicationId,
+            applicationSecret,
+            accessTokenSecret,
+            accessTokenOath,
+            refreshToken
+        } = tokens[0];
+        const data = {
+            "client_id": applicationId,
+            "client_secret": applicationSecret,
+            "refresh_token": refreshToken,
+            "grant_type": "refresh_token"
+        };
+        const config = {
+            headers: {
+                "Square-Version": "2020-08-26",
+                "Content-Type": "application/json"
+            }
+        };
+
+        axios.post(
+            `${BASEURL}/oauth2/token`,
+            data,
+            config
+        ).then(resp => {
+            tokens[0].accessTokenOath = resp.data.access_token;
+            tokens[0].save(err => {
+                if (err) res.json({ err: "error saving tokens" })
+                console.log({ success: true })
+            })
+        });
+    }).catch(err => console.log(err))
+  })
+});
 
 module.exports = (app, io) => {
     /**

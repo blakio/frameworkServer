@@ -278,8 +278,14 @@ module.exports = (app, io) => {
             if(!skip && limit) return getDB(req.headers.blakio_store)[table].find({}).limit(parseInt(limit));
             return getDB(req.headers.blakio_store)[table].find({});
         }
-        find().then(table => res.json(table))
-            .catch(err => res.json(err));
+        getDB(req.headers.blakio_store)[table].count().then(count => {
+            find().then(table => {
+                res.json({
+                    table,
+                    count
+                })
+            }).catch(err => res.json({err}));
+        }).catch(err => res.json({err}));
     });
 
     // POST /api/table/search/Time

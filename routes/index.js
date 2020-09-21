@@ -266,6 +266,23 @@ module.exports = (app, io) => {
     });
 
     // POST /api/table/search/Time
+    app.post("/api/table/pagination/:table/:skip/:limit", (req, res) => {
+        const {
+            table,
+            skip,
+            limit
+        } = req.params;
+        const find = async () => {
+            if(skip && limit) return getDB(req.headers.blakio_store)[table].find({}).skip(parseInt(skip)).limit(parseInt(limit));
+            if(skip && !limit) return getDB(req.headers.blakio_store)[table].find({}).skip(parseInt(skip));
+            if(!skip && limit) return getDB(req.headers.blakio_store)[table].find({}).limit(parseInt(limit));
+            return getDB(req.headers.blakio_store)[table].find({});
+        }
+        find().then(table => res.json(table))
+            .catch(err => res.json(err));
+    });
+
+    // POST /api/table/search/Time
     app.post("/api/table/aggregate/:table/:id", (req, res) => {
         getDB(req.headers.blakio_store)[req.params.table].aggregate([
             {

@@ -648,6 +648,11 @@ module.exports = (app, io) => {
     app.get("/api/confirmation", (req, res) => {
         res.sendFile('./confirmation/index.html', { root: __dirname })
     });
+    
+    // GET api/confirmation/css
+    app.get("/api/confirmation/css", (req, res) => {
+        res.sendFile('./confirmation/main.css', { root: __dirname })
+    });
 
     app.post("/api/square/setPaymentIdWithLastTransaction", (req, res) => {
         const {
